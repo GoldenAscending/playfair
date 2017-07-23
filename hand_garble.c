@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define printf(...) (void)0;
+#define printf(args...) fprintf(stderr, ##args)
 
 uint8_t rol8(uint8_t x, int y);
 uint32_t rol8x(uint8_t x, int y);

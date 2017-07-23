@@ -5,7 +5,9 @@ void sap_hash(unsigned char* blockIn, unsigned char* keyOut);
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include "omghax.h"
+#include "omg_hax.h"
+
+#define printf(args...) fprintf(stderr, ##args)
 
 void xor_blocks(unsigned char* a, unsigned char* b, unsigned char* out)
 {

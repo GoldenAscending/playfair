@@ -4,7 +4,8 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
-#define printf(...) (void)0;
+
+#define printf(args...) fprintf(stderr, ##args)
 
 int shift[] = {7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
                5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20,

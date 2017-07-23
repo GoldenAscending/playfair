@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define printf(args...) fprintf(stderr, ##args)
+
 void garble(unsigned char*, unsigned char*, unsigned char*, unsigned char*, unsigned char*);
 
 unsigned char rol8(unsigned char input, int count)
