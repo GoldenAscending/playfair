@@ -31,6 +31,7 @@ void generate_session_key(unsigned char* oldSap, unsigned char* messageIn, unsig
 void cycle(unsigned char* block, uint32_t key_schedule[11][4]);
 void z_xor(unsigned char* in, unsigned char* out, int blocks);
 void x_xor(unsigned char* in, unsigned char* out, int blocks);
+void print_block(char* msg, unsigned char* dword);
 
 unsigned char* fairplay_setup(char* message, int length)
 {
@@ -55,11 +56,15 @@ unsigned char* fairplay_setup(char* message, int length)
     	}
     	else if (seq == SETUP2_MESSAGE_SEQ)
     	{
+    		int header_size = sizeof(fp_header);
+
     		response = malloc(SETUP2_RESPONSE_LENGTH);
 
-    		int header_size = sizeof(fp_header);
-    		memcpy(response, &fp_header, header_size);
-    		memcpy(&response[header_size], &message[length - SETUP2_RESPONSE_SUFFIX_LENGTH], SETUP2_RESPONSE_SUFFIX_LENGTH);
+    		if (response != NULL)
+    		{
+				memcpy(response, &fp_header, header_size);
+				memcpy(&response[header_size], &message[length - SETUP2_RESPONSE_SUFFIX_LENGTH], SETUP2_RESPONSE_SUFFIX_LENGTH);
+    		}
     	}
 
 		return response;
@@ -72,6 +77,35 @@ unsigned char* fairplay_setup(char* message, int length)
 
 unsigned char* fairplay_decrypt(char* message3, unsigned char* cipherText)
 {
+   int messageType = message3[TYPE_POSITION];
+   int cipherType = cipherText[TYPE_POSITION];
+   int messageSeq = message3[SEQ_POSITION];
+
+   fprintf(stderr, "Decrypting: messageType=%i, messageSeq=%i, cipherType=%i\n", messageType, messageSeq, cipherType);
+   print_block("message3: ", &message3[0x00]);
+   print_block("message3: ", &message3[0x10]);
+   print_block("message3: ", &message3[0x20]);
+   print_block("message3: ", &message3[0x30]);
+   print_block("message3: ", &message3[0x40]);
+   print_block("message3: ", &message3[0x50]);
+   print_block("message3: ", &message3[0x60]);
+   print_block("message3: ", &message3[0x70]);
+   print_block("message3: ", &message3[0x80]);
+   print_block("message3: ", &message3[0x90]);
+   print_block("message3: ", &message3[0xA0]);
+
+   print_block("cipherText: ", &cipherText[0x00]);
+   print_block("cipherText: ", &cipherText[0x10]);
+   print_block("cipherText: ", &cipherText[0x20]);
+   print_block("cipherText: ", &cipherText[0x30]);
+   print_block("cipherText: ", &cipherText[0x40]);
+
+   if (messageType != SETUP_MESSAGE_TYPE || messageSeq != SETUP2_MESSAGE_SEQ ||
+	   cipherType != DECRYPT_MESSAGE_TYPE)
+   {
+	   return NULL;
+   }
+
    unsigned char* chunk1 = &cipherText[16];
    unsigned char* chunk2 = &cipherText[56];
    int i;
@@ -79,13 +113,19 @@ unsigned char* fairplay_decrypt(char* message3, unsigned char* cipherText)
    unsigned char* keyOut = malloc(16);
    unsigned char sapKey[16];
    uint32_t key_schedule[11][4];
+
    generate_session_key(default_sap, (unsigned char*)message3, sapKey);
    generate_key_schedule(sapKey, key_schedule);
    z_xor(chunk2, blockIn, 1);
    cycle(blockIn, key_schedule);
+
    for (i = 0; i < 16; i++)
+   {
       keyOut[i] = blockIn[i] ^ chunk1[i];
+   }
+
    x_xor(keyOut, keyOut, 1);
    z_xor(keyOut, keyOut, 1);
+
    return keyOut;
 }
