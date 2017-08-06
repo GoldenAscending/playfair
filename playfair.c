@@ -63,7 +63,11 @@ unsigned char* fairplay_setup(char* message, int length)
     		if (response != NULL)
     		{
 				memcpy(response, &fp_header, header_size);
-				memcpy(&response[header_size], &message[length - SETUP2_RESPONSE_SUFFIX_LENGTH], SETUP2_RESPONSE_SUFFIX_LENGTH);
+				memcpy(
+					&response[header_size],
+					&message[length - SETUP2_RESPONSE_SUFFIX_LENGTH],
+					SETUP2_RESPONSE_SUFFIX_LENGTH
+				);
     		}
     	}
 
